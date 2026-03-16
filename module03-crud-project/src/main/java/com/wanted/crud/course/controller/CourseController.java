@@ -101,5 +101,6 @@ public class CourseController {
         SectionDTO newSection = new SectionDTO(null, null, "chapter 1. 트렌젝션의 이해", 1);
 
         return service.createCourseWithDefaultSection(newCourse, newSection);
+        
     }
 }
