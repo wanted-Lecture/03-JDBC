@@ -1,6 +1,8 @@
 package com.wanted.crud.course.controller;
 
 import com.wanted.crud.course.model.dto.CourseDTO;
+import com.wanted.crud.course.model.dto.CourseSectionDTO;
+import com.wanted.crud.course.model.dto.SectionDTO;
 import com.wanted.crud.course.model.service.CourseService;
 
 import java.util.List;
@@ -72,9 +74,32 @@ public class CourseController {
     }
 
     // 강과 삭제
-    public boolean deleteCourse(long id) {
+    public boolean deleteCourseById(long id) {
 
-        return service.deleteCourse(id);
+        // 문자열로 가장 쉽게 바꾸는 방법
+        // + ""
+        // 문자를 숫자로 바꾸는 방법
+        // + 0
+        // 숫자를 boolean으로 바꿀 때
+        // > 0 or = 0 / true는 1이고, false는 0이기 때문에
+        return service.deleteCourse(id) > 0;
     }
 
+    public CourseSectionDTO findJoin(long courseId) {
+        return service.findCourseWithSections(courseId);
+    }
+
+    /**
+     * 트렌젝션 테스트 전용 메소드 (강의와 섹션 동시 삽입)
+     * @return
+     */
+    public boolean createCourseWithDefaultSection() {
+        // 강의 객체
+        CourseDTO newCourse = new CourseDTO(null, 1L, "Java Transction Master",
+                "트렌젝션을 활용한 강의 등록", "draft");
+        // 섹션 객체
+        SectionDTO newSection = new SectionDTO(null, null, "chapter 1. 트렌젝션의 이해", 1);
+
+        return service.createCourseWithDefaultSection(newCourse, newSection);
+    }
 }

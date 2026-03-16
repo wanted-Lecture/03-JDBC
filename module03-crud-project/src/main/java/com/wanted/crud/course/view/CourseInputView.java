@@ -2,6 +2,7 @@ package com.wanted.crud.course.view;
 
 import com.wanted.crud.course.controller.CourseController;
 import com.wanted.crud.course.model.dto.CourseDTO;
+import com.wanted.crud.course.model.dto.CourseSectionDTO;
 
 import java.util.List;
 import java.util.Scanner;
@@ -144,12 +145,18 @@ public class CourseInputView {
     private void createCourseWithDefaultSection() {
         outputView.printMessage("\n--- [심화 실습] 트랜잭션으로 강좌 개설 ---");
 
-        boolean result = true;
+        /* comment.
+         *  강의를 등록함과 동시에, 강의 안에 sections를 삽입
+         *  1. 강의를 등록한다.
+         *  2. 강의 내부에 섹션을 등록한다.
+         */
+
+        boolean result = controller.createCourseWithDefaultSection();
 
         if (result) {
-            outputView.printSuccess("");
+            outputView.printSuccess("✅ 강좌와 기본 섹션이 성공적으로 생성 되었습니다.");
         } else {
-            outputView.printError("");
+            outputView.printError("🚨 겅좌 개설 비즈니스 로직 처리 중 문제 발생!!");
         }
     }
 
@@ -158,7 +165,9 @@ public class CourseInputView {
         System.out.print("조회할 강좌 ID를 입력해주세요 : ");
         long id = inputLong();
 
-        outputView.printCourseDetail(null);
+        CourseSectionDTO courseDetail = controller.findJoin(id);
+
+        outputView.printCourseDetail(courseDetail);
     }
 
     // 과정 등록 메서드
@@ -224,10 +233,17 @@ public class CourseInputView {
         System.out.print("삭제할 과정 번호를 입력해주세요 : ");
         long id = inputLong();
 
-        boolean result = controller.deleteCourse(id);
+        boolean result = controller.deleteCourseById(id);
 
         if (result) {
             outputView.printSuccess("✅ 과정 삭제 성공!");
+            CourseDTO deleteCourse = controller.findCourseById(id);
+
+            if (deleteCourse == null) {
+                outputView.printMessage("🚮 삭제 확인 : " + id + "번 과정이 삭제 되었습니다.");
+            } else {
+                outputView.printError("과정 삭제 실패 : 해당 ID의 과정이 없습니다.");
+            }
         } else {
             outputView.printError("과정 삭제 실패 : 해당 ID의 과정이 없습니다.");
         }

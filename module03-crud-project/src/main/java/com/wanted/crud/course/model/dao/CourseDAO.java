@@ -1,6 +1,8 @@
 package com.wanted.crud.course.model.dao;
 
 import com.wanted.crud.course.model.dto.CourseDTO;
+import com.wanted.crud.course.model.dto.CourseSectionDTO;
+import com.wanted.crud.course.model.dto.SectionDTO;
 import com.wanted.crud.global.utils.QueryUtil;
 
 import java.sql.*;
@@ -39,15 +41,8 @@ public class CourseDAO {
             ResultSet rset = pstmt.executeQuery();
 
             while (rset.next()) {
-                CourseDTO course = new CourseDTO(
-                        rset.getLong("course_id"),
-                        rset.getLong("author_id"),
-                        rset.getString("title"),
-                        rset.getString("description"),
-                        rset.getString("status")
-                );
-
-                courseList.add(course);
+//                convertToDTO(rset);
+                courseList.add(convertToDTO(rset));
 
             }
 
@@ -63,6 +58,7 @@ public class CourseDAO {
 
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setLong(1, id);
+            // select의 결과는 ResultSet 객체로 반환된다.
             try (ResultSet rset = pstmt.executeQuery()) {
                 if (rset.next()) {
                     return convertToDTO(rset);
@@ -161,7 +157,7 @@ public class CourseDAO {
     }
 
     // 강좌 삭제 로직
-    public boolean deleteCourse(long id) throws SQLException {
+    public int deleteCourse(long id) throws SQLException {
 
         if (!existsById(id)) {
             throw new IllegalArgumentException("🚨 삭제하려는 강좌(ID: " + id + ")가 존재하지 않습니다.");
@@ -171,14 +167,67 @@ public class CourseDAO {
 
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setLong(1, id);
-            int resultRow = pstmt.executeUpdate();
+            return pstmt.executeUpdate();
 
-            if (resultRow > 0) {
-                return true;
-            } else {
-                return false;
-            }
+//            반환 타입 boolean 일 때,
+//            int resultRow = pstmt.executeUpdate();
+//
+//            if (resultRow > 0) {
+//                return true;
+//            } else {
+//                return false;
+//            }
         }
+    }
+
+    // 코스 + 섹션으로 이루어진 데이터 반환
+    public CourseSectionDTO findCourseWithSections(long courseId) throws SQLException {
+        String query = QueryUtil.getQuery("course.findCourseWithSections");
+
+        // null로 초기화, 이후 대입 예정
+        CourseSectionDTO courseSectionDTO = null;
+
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setLong(1, courseId);
+
+            ResultSet rset = pstmt.executeQuery();
+            while (rset.next()) {
+                /* comment, 1개의 코스에는 여러개의 섹션이 있다.
+                *   1개의 강의 정보만 생성한다.
+                * */
+                if (courseSectionDTO == null) {
+                    courseSectionDTO = new CourseSectionDTO(
+                            rset.getLong("course_id"),
+                            rset.getLong("author_id"),
+                            rset.getString("title"),
+                            rset.getString("description"),
+                            rset.getString("status")
+                    );
+                }
+
+                /* comment, LEFT JOIN이기 때문에, section_id는 null 일 수 있다.
+                *   getLong(), getInt()는 DB null을 그대로 담지 못하며
+                *   null 대신 0으로 처리하여 반환해준다.
+                *   따라서 wasNull()메서드로 처리해준다.
+                * */
+
+                Long sectionId = rset.getLong("section_id");
+
+                if (!rset.wasNull()) {
+                    SectionDTO section = new SectionDTO(
+                            sectionId,
+                            rset.getLong("section_course_id"),
+                            rset.getString("section_title"),
+                            rset.getInt("section_order")
+                    );
+
+                    courseSectionDTO.getSections().add(section);
+                }
+            }
+
+        }
+
+        return courseSectionDTO;
     }
 
 
