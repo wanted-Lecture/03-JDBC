@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+    <entry key="selectEmpById">
+        SELECT
+            *
+        FROM EMPLOYEE
+        WHERE EMP_ID = ?
+    </entry>
+
+    <entry key="selectAll">
+        SELECT
+        *
+        FROM EMPLOYEE
+    </entry>
+</properties>

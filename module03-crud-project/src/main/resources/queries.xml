@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<properties>
+
+    <query key="course.findAll">
+        select * from courses
+    </query>
+
+    <query key="course.findById">
+        select *
+        from
+            courses
+        where
+            course_id = ?
+    </query>
+
+    <query key="course.creatCourse">
+        insert into courses (
+        author_id,
+        title,
+        description) value (
+        ?, ?, ?
+        )
+    </query>
+
+    <query key="coruse.save">
+        insert into courses (
+        author_id,
+        title,
+        description,
+        status) value ( ?, ?, ?, ?)
+    </query>
+
+    <query key="course.update">
+        update courses
+        set
+            title = ?,
+            description = ?
+        where
+        course_id = ?
+    </query>
+
+    <query key="course.delete">
+        delete from courses where course_id = ?
+    </query>
+
+
+
+</properties>
